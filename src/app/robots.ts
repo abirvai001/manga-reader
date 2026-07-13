@@ -7,9 +7,10 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/admin", "/admin/", "/api/admin", "/api/"],
+        disallow: ["/admin/", "/api/"],
       },
     ],
+    // Prefer dynamic sitemap (includes all manga when available)
     sitemap: absoluteUrl("/sitemap.xml"),
     host: absoluteUrl("/"),
   };
