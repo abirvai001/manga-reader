@@ -16,11 +16,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "YourManga.EN — Native PDF Manga Reader",
+    default: "YourManga.EN",
     template: "%s | YourManga.EN",
   },
-  description:
-    "Read manga PDFs as a smooth native web app. Continuous scroll, page turn modes, and seamless ad monetization.",
+  description: "YourManga.EN — read manga online.",
 };
 
 export default function RootLayout({

@@ -17,10 +17,7 @@ export function Footer() {
         <div className="flex w-full flex-col items-center justify-between gap-4 sm:flex-row">
           <div className="flex items-center gap-2 text-sm text-zinc-400">
             <BookOpen className="h-4 w-4 text-violet-400" />
-            <span>
-              © {new Date().getFullYear()} YourManga.EN — PDF manga, native
-              feel.
-            </span>
+            <span>© {new Date().getFullYear()} YourManga.EN</span>
           </div>
           <div className="flex gap-6 text-sm text-zinc-500">
             <Link href="/browse" className="hover:text-zinc-300">

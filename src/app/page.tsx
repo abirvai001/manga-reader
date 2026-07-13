@@ -25,19 +25,13 @@ export default async function HomePage() {
         <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24">
           <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-xs font-medium text-violet-300">
             <Sparkles className="h-3.5 w-3.5" />
-            YourManga.EN — PDF → native reader
+            YourManga.EN
           </div>
           <h1 className="mt-5 max-w-3xl text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
-            Read manga like an app.
-            <span className="block bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
-              Powered by your PDFs.
+            <span className="bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
+              YourManga.EN
             </span>
           </h1>
-          <p className="mt-5 max-w-xl text-base leading-relaxed text-zinc-400 sm:text-lg">
-            No browser PDF chrome. No clunky embeds. Smooth vertical scroll or
-            page-turn modes with lazy-loaded canvases — and full control over
-            content &amp; ads.
-          </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
               href="/browse"
@@ -56,8 +50,7 @@ export default async function HomePage() {
 
           {isDemoMode() && (
             <p className="mt-6 rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-200/90">
-              Running in <strong>demo mode</strong> with sample data. Add
-              Supabase credentials to enable production storage &amp; auth.
+              Running in <strong>demo mode</strong> with sample data.
             </p>
           )}
         </div>
