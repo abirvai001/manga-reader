@@ -70,8 +70,11 @@ export const metadata: Metadata = {
     title: DEFAULT_TITLE,
     description: DEFAULT_DESCRIPTION,
   },
+  verification: {
+    google: "p23kRA9rTd4hDadpQroaawHpmuHd4mMYj-3yEwbAevs",
+  },
   other: {
-    "rating": "adult",
+    rating: "adult",
   },
 };
 
