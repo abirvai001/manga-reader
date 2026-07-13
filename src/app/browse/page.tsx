@@ -4,6 +4,8 @@ import { MangaGrid } from "@/components/manga/MangaGrid";
 import { getAdByZone, getCategories, getMangaList } from "@/lib/data";
 import { cn } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Browse",
 };
@@ -42,7 +44,6 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
       </div>
 
       <div className="flex flex-col gap-8 lg:flex-row">
-        {/* Main grid */}
         <div className="min-w-0 flex-1">
           <div className="mb-5 flex flex-wrap gap-2">
             <Link
@@ -77,7 +78,6 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
           />
         </div>
 
-        {/* Sidebar ads — collapses if empty */}
         <aside className="w-full shrink-0 lg:w-64">
           <div className="sticky top-24 space-y-4">
             {sidebarAd ? (
@@ -93,7 +93,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
               <ul className="mt-2 space-y-2 text-xs leading-relaxed text-zinc-500">
                 <li>Open any title for Webtoon scroll or page-turn reading.</li>
                 <li>Ads between pages appear every 5 pages in vertical mode.</li>
-                <li>Admin can upload PDFs, covers, and GIF/PNG banners.</li>
+                <li>Sponsorship: abirodroid.admob@gmail.com</li>
               </ul>
             </div>
           </div>

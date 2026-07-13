@@ -3,7 +3,9 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import { AdBannerStatic } from "@/components/ads/AdBanner";
 import { MangaGrid } from "@/components/manga/MangaGrid";
 import { getAdByZone, getCategories, getMangaList } from "@/lib/data";
-import { isSupabaseConfigured } from "@/lib/utils";
+import { isDemoMode } from "@/lib/env";
+
+export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const [manga, categories, topAd, bottomAd] = await Promise.all([
@@ -15,7 +17,6 @@ export default async function HomePage() {
 
   return (
     <div className="pb-16">
-      {/* Hero */}
       <section className="relative overflow-hidden border-b border-white/5">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-violet-900/40 via-zinc-950 to-zinc-950" />
         <div className="pointer-events-none absolute -left-32 top-20 h-72 w-72 rounded-full bg-fuchsia-600/20 blur-3xl" />
@@ -24,7 +25,7 @@ export default async function HomePage() {
         <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24">
           <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-xs font-medium text-violet-300">
             <Sparkles className="h-3.5 w-3.5" />
-            PDF → native reader experience
+            YourManga.EN — PDF → native reader
           </div>
           <h1 className="mt-5 max-w-3xl text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
             Read manga like an app.
@@ -53,22 +54,19 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          {!isSupabaseConfigured() && (
+          {isDemoMode() && (
             <p className="mt-6 rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-200/90">
               Running in <strong>demo mode</strong> with sample data. Add
-              Supabase credentials to <code className="text-amber-100">.env.local</code>{" "}
-              for production storage &amp; auth.
+              Supabase credentials to enable production storage &amp; auth.
             </p>
           )}
         </div>
       </section>
 
-      {/* Top header ad — collapses if empty */}
       <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6">
         <AdBannerStatic ad={topAd} maxHeight={90} />
       </div>
 
-      {/* Categories */}
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         <div className="mb-5 flex items-end justify-between">
           <h2 className="text-lg font-semibold text-white">Categories</h2>
@@ -92,7 +90,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Latest manga */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="mb-6 flex items-end justify-between">
           <div>
@@ -105,7 +102,6 @@ export default async function HomePage() {
         <MangaGrid manga={manga} />
       </section>
 
-      {/* Footer ad */}
       <div className="mx-auto mt-12 max-w-7xl px-4 sm:px-6">
         <AdBannerStatic ad={bottomAd} maxHeight={90} />
       </div>

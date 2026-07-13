@@ -1,16 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Shield } from "lucide-react";
-import { isSupabaseConfigured } from "@/lib/utils";
+import { hasSupabaseEnv, isDemoMode } from "@/lib/env";
 
 export default function AdminLoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const next = searchParams.get("next") || "/admin";
+  const notConfigured = searchParams.get("error") === "not_configured";
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -18,12 +22,17 @@ export default function AdminLoginPage() {
     setLoading(true);
 
     try {
-      if (!isSupabaseConfigured()) {
-        // Demo mode: accept any credentials
-        sessionStorage.setItem("mangaflow_demo_admin", "1");
-        router.push("/admin");
+      if (isDemoMode() && !hasSupabaseEnv()) {
+        sessionStorage.setItem("yourmanga_demo_admin", "1");
+        router.push(next);
         router.refresh();
         return;
+      }
+
+      if (!hasSupabaseEnv()) {
+        throw new Error(
+          "Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY on Vercel."
+        );
       }
 
       const { createClient } = await import("@/lib/supabase/client");
@@ -33,7 +42,7 @@ export default function AdminLoginPage() {
         password,
       });
       if (authError) throw authError;
-      router.push("/admin");
+      router.push(next);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
@@ -49,16 +58,29 @@ export default function AdminLoginPage() {
           <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-600/20 text-violet-400">
             <Shield className="h-6 w-6" />
           </span>
-          <h1 className="mt-4 text-xl font-bold text-white">Admin login</h1>
+          <h1 className="mt-4 text-xl font-bold text-white">
+            YourManga.EN Admin
+          </h1>
           <p className="mt-1 text-sm text-zinc-500">
             Manage manga library and ad placements
           </p>
         </div>
 
-        {!isSupabaseConfigured() && (
+        {notConfigured && (
+          <p className="mb-4 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-200">
+            Server is not configured with Supabase credentials.
+          </p>
+        )}
+
+        {isDemoMode() && !hasSupabaseEnv() && (
           <p className="mb-4 rounded-lg border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
-            Demo mode: any email/password works. Configure Supabase for real
-            auth.
+            Demo mode: any email/password works until Supabase is connected.
+          </p>
+        )}
+
+        {hasSupabaseEnv() && !isDemoMode() && (
+          <p className="mb-4 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-200">
+            Production login — use the admin user from Supabase Auth.
           </p>
         )}
 
@@ -70,6 +92,7 @@ export default function AdminLoginPage() {
             <input
               type="email"
               required
+              autoComplete="username"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full rounded-xl border border-white/10 bg-zinc-950 px-3 py-2.5 text-sm text-white outline-none focus:border-violet-500"
@@ -83,6 +106,7 @@ export default function AdminLoginPage() {
             <input
               type="password"
               required
+              autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full rounded-xl border border-white/10 bg-zinc-950 px-3 py-2.5 text-sm text-white outline-none focus:border-violet-500"

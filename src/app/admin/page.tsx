@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { BookOpen, FolderOpen, Megaphone, Plus } from "lucide-react";
 import { getAllAds, getCategories, getMangaList } from "@/lib/data";
-import { isSupabaseConfigured } from "@/lib/utils";
+import { hasSupabaseEnv, isDemoMode } from "@/lib/env";
+
+export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
   const [manga, categories, ads] = await Promise.all([
-    getMangaList(),
+    getMangaList({ includeUnpublished: true }),
     getCategories(),
     getAllAds(),
   ]);
@@ -40,7 +42,7 @@ export default async function AdminDashboardPage() {
         <div>
           <h1 className="text-2xl font-bold text-white">Dashboard</h1>
           <p className="mt-1 text-sm text-zinc-500">
-            Content &amp; monetization control center
+            YourManga.EN — content &amp; monetization control
           </p>
         </div>
         <Link
@@ -52,10 +54,17 @@ export default async function AdminDashboardPage() {
         </Link>
       </div>
 
-      {!isSupabaseConfigured() && (
+      {isDemoMode() && (
         <div className="mb-6 rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
-          <strong>Demo mode.</strong> Stats reflect mock data. Connect Supabase
-          (see README) to persist uploads, storage buckets, and real auth.
+          <strong>Demo mode.</strong> Connect real Supabase keys on Vercel to
+          persist uploads and enable secure admin auth.
+        </div>
+      )}
+
+      {hasSupabaseEnv() && !isDemoMode() && (
+        <div className="mb-6 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
+          <strong>Production mode.</strong> Supabase is connected. Use your
+          admin email/password to manage content.
         </div>
       )}
 
@@ -111,6 +120,16 @@ export default async function AdminDashboardPage() {
                   </td>
                 </tr>
               ))}
+              {manga.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={3}
+                    className="px-4 py-8 text-center text-zinc-500"
+                  >
+                    No manga yet. Upload your first PDF.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

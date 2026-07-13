@@ -1,30 +1,40 @@
 "use client";
 
-import { isSupabaseConfigured } from "./utils";
 import type { PlacementZone } from "./types";
+
+async function api<T>(
+  url: string,
+  init?: RequestInit
+): Promise<T> {
+  const res = await fetch(url, {
+    ...init,
+    headers: {
+      ...(init?.body instanceof FormData
+        ? {}
+        : { "Content-Type": "application/json" }),
+      ...init?.headers,
+    },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.error || `Request failed (${res.status})`);
+  }
+  return data as T;
+}
 
 export async function uploadFile(
   bucket: "pdfs" | "covers" | "ads",
   file: File
 ): Promise<string> {
-  if (!isSupabaseConfigured()) {
-    // Demo: return object URL so UI can preview
-    return URL.createObjectURL(file);
-  }
-
-  const { createClient } = await import("./supabase/client");
-  const supabase = createClient();
-  const ext = file.name.split(".").pop() || "bin";
-  const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-
-  const { error } = await supabase.storage.from(bucket).upload(path, file, {
-    cacheControl: "3600",
-    upsert: false,
+  const kind = bucket === "pdfs" ? "pdf" : bucket === "covers" ? "cover" : "ad";
+  const form = new FormData();
+  form.append("file", file);
+  form.append("kind", kind);
+  const data = await api<{ url: string }>("/api/admin/upload", {
+    method: "POST",
+    body: form,
   });
-  if (error) throw error;
-
-  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
-  return data.publicUrl;
+  return data.url;
 }
 
 export async function createManga(input: {
@@ -34,55 +44,37 @@ export async function createManga(input: {
   cover_image_url: string | null;
   pdf_file_url: string;
 }) {
-  if (!isSupabaseConfigured()) {
-    return { id: `demo-${Date.now()}`, ...input, created_at: new Date().toISOString() };
-  }
-
-  const { createClient } = await import("./supabase/client");
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from("manga")
-    .insert(input)
-    .select()
-    .single();
-  if (error) throw error;
-  return data;
+  const data = await api<{ manga: { id: string } }>("/api/admin/manga", {
+    method: "POST",
+    body: JSON.stringify({
+      ...input,
+      is_published: true,
+    }),
+  });
+  return data.manga;
 }
 
 export async function deleteManga(id: string) {
-  if (!isSupabaseConfigured()) return;
-  const { createClient } = await import("./supabase/client");
-  const supabase = createClient();
-  const { error } = await supabase.from("manga").delete().eq("id", id);
-  if (error) throw error;
+  await api(`/api/admin/manga?id=${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  });
 }
 
 export async function createCategory(name: string, slug: string) {
-  if (!isSupabaseConfigured()) {
-    return {
-      id: `cat-demo-${Date.now()}`,
-      name,
-      slug,
-      created_at: new Date().toISOString(),
-    };
-  }
-  const { createClient } = await import("./supabase/client");
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from("categories")
-    .insert({ name, slug })
-    .select()
-    .single();
-  if (error) throw error;
-  return data;
+  const data = await api<{ category: { id: string; name: string; slug: string; created_at: string } }>(
+    "/api/admin/categories",
+    {
+      method: "POST",
+      body: JSON.stringify({ name, slug }),
+    }
+  );
+  return data.category;
 }
 
 export async function deleteCategory(id: string) {
-  if (!isSupabaseConfigured()) return;
-  const { createClient } = await import("./supabase/client");
-  const supabase = createClient();
-  const { error } = await supabase.from("categories").delete().eq("id", id);
-  if (error) throw error;
+  await api(`/api/admin/categories?id=${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  });
 }
 
 export async function createAd(input: {
@@ -91,22 +83,11 @@ export async function createAd(input: {
   target_url: string | null;
   is_active: boolean;
 }) {
-  if (!isSupabaseConfigured()) {
-    return {
-      id: `ad-demo-${Date.now()}`,
-      ...input,
-      created_at: new Date().toISOString(),
-    };
-  }
-  const { createClient } = await import("./supabase/client");
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from("ad_banners")
-    .insert(input)
-    .select()
-    .single();
-  if (error) throw error;
-  return data;
+  const data = await api<{ ad: unknown }>("/api/admin/ads", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+  return data.ad;
 }
 
 export async function updateAd(
@@ -118,17 +99,14 @@ export async function updateAd(
     is_active: boolean;
   }>
 ) {
-  if (!isSupabaseConfigured()) return;
-  const { createClient } = await import("./supabase/client");
-  const supabase = createClient();
-  const { error } = await supabase.from("ad_banners").update(patch).eq("id", id);
-  if (error) throw error;
+  await api("/api/admin/ads", {
+    method: "PATCH",
+    body: JSON.stringify({ id, ...patch }),
+  });
 }
 
 export async function deleteAd(id: string) {
-  if (!isSupabaseConfigured()) return;
-  const { createClient } = await import("./supabase/client");
-  const supabase = createClient();
-  const { error } = await supabase.from("ad_banners").delete().eq("id", id);
-  if (error) throw error;
+  await api(`/api/admin/ads?id=${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  });
 }

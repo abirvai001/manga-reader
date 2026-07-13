@@ -11,13 +11,24 @@ export const mangaCreateSchema = z.object({
   title: z.string().trim().min(1, "Title is required").max(200),
   description: z.string().trim().max(5000).optional().default(""),
   category_id: z
-    .string()
-    .uuid()
-    .nullable()
+    .union([z.string().uuid(), z.literal(""), z.null()])
     .optional()
-    .or(z.literal("").transform(() => null)),
-  cover_image_url: z.string().url().nullable().optional(),
-  pdf_file_url: z.string().url("Valid PDF URL required"),
+    .transform((v) => (v ? v : null)),
+  cover_image_url: z
+    .union([z.string().url(), z.literal(""), z.null()])
+    .optional()
+    .transform((v) => (v ? v : null)),
+  // Allow https URLs and same-origin / storage paths used in production
+  pdf_file_url: z
+    .string()
+    .min(1, "PDF URL required")
+    .refine(
+      (v) =>
+        v.startsWith("https://") ||
+        v.startsWith("http://") ||
+        v.startsWith("data:"),
+      "Valid PDF URL required"
+    ),
   is_published: z.boolean().optional().default(true),
 });
 
@@ -36,14 +47,12 @@ export const categoryCreateSchema = z.object({
 });
 
 export const adCreateSchema = z.object({
-  banner_image_url: z.string().url(),
+  banner_image_url: z.string().min(1),
   placement_zone: z.enum(placementValues),
   target_url: z
-    .string()
-    .url()
-    .nullable()
+    .union([z.string().url(), z.literal(""), z.null()])
     .optional()
-    .or(z.literal("").transform(() => null)),
+    .transform((v) => (v ? v : null)),
   is_active: z.boolean().optional().default(true),
 });
 

@@ -9,7 +9,7 @@ async function getSupabase() {
 }
 
 function useMock(): boolean {
-  return isDemoMode() || !hasSupabaseEnv();
+  return !hasSupabaseEnv() || isDemoMode();
 }
 
 export async function getCategories(): Promise<Category[]> {
