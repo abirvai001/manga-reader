@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { AgeGate } from "@/components/layout/AgeGate";
 import { JsonLd } from "@/components/seo/JsonLd";
 import {
   DEFAULT_DESCRIPTION,
@@ -90,9 +91,11 @@ export default function RootLayout({
     >
       <body className="flex min-h-full flex-col bg-zinc-950 text-zinc-50">
         <JsonLd data={websiteJsonLd()} />
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        <AgeGate>
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </AgeGate>
       </body>
     </html>
   );
