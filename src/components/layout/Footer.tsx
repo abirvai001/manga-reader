@@ -23,9 +23,6 @@ export function Footer() {
             <Link href="/browse" className="hover:text-zinc-300">
               Browse
             </Link>
-            <Link href="/admin" className="hover:text-zinc-300">
-              Admin
-            </Link>
           </div>
         </div>
 

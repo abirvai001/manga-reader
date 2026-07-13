@@ -2,14 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, Menu, Search, Shield, X } from "lucide-react";
+import { BookOpen, Menu, Search, X } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 const nav = [
   { href: "/", label: "Home" },
   { href: "/browse", label: "Browse" },
-  { href: "/admin", label: "Admin" },
 ];
 
 export function Header() {
@@ -50,14 +49,7 @@ export function Header() {
                   : "text-zinc-400 hover:bg-white/5 hover:text-white"
               )}
             >
-              {item.label === "Admin" ? (
-                <span className="inline-flex items-center gap-1.5">
-                  <Shield className="h-3.5 w-3.5" />
-                  Admin
-                </span>
-              ) : (
-                item.label
-              )}
+              {item.label}
             </Link>
           ))}
         </nav>

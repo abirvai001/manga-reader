@@ -40,12 +40,6 @@ export default async function HomePage() {
               Browse library
               <ArrowRight className="h-4 w-4" />
             </Link>
-            <Link
-              href="/admin"
-              className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-            >
-              Admin panel
-            </Link>
           </div>
 
           {isDemoMode() && (
