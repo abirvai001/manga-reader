@@ -33,7 +33,7 @@ export function Header() {
             <BookOpen className="h-5 w-5" />
           </span>
           <span className="hidden sm:inline">
-            Manga<span className="text-violet-400">Flow</span>
+            YourManga<span className="text-violet-400">.EN</span>
           </span>
         </Link>
 

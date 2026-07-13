@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "MangaFlow — Native PDF Manga Reader",
-    template: "%s | MangaFlow",
+    default: "YourManga.EN — Native PDF Manga Reader",
+    template: "%s | YourManga.EN",
   },
   description:
     "Read manga PDFs as a smooth native web app. Continuous scroll, page turn modes, and seamless ad monetization.",
