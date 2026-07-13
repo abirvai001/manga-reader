@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Upload, FileText, ImageIcon, ArrowLeft } from "lucide-react";
 import type { Category } from "@/lib/types";
 import { createManga, uploadFile } from "@/lib/admin-actions";
+import { suggestMangaDescription } from "@/lib/seo";
 import { isSupabaseConfigured } from "@/lib/utils";
 
 export default function NewMangaPage() {
@@ -19,6 +20,16 @@ export default function NewMangaPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState("");
+
+  function fillSeoDescription() {
+    if (!title.trim()) {
+      setError("Enter a title first, then generate SEO description.");
+      return;
+    }
+    const genre = categories.find((c) => c.id === categoryId)?.name;
+    setDescription(suggestMangaDescription(title.trim(), genre));
+    setError(null);
+  }
 
   useEffect(() => {
     fetch("/api/categories")
@@ -47,9 +58,13 @@ export default function NewMangaPage() {
       }
 
       setProgress("Saving metadata…");
+      const genre = categories.find((c) => c.id === categoryId)?.name;
+      const finalDescription =
+        description.trim() ||
+        suggestMangaDescription(title.trim(), genre);
       const row = await createManga({
         title,
-        description,
+        description: finalDescription,
         category_id: categoryId || null,
         cover_image_url: coverUrl,
         pdf_file_url: pdfUrl,
@@ -96,14 +111,27 @@ export default function NewMangaPage() {
             placeholder="Series title"
           />
         </Field>
-        <Field label="Description">
+        <Field label="SEO description (Google snippet)">
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            rows={4}
+            rows={5}
             className="w-full resize-y rounded-xl border border-white/10 bg-zinc-950 px-3 py-2.5 text-sm text-white outline-none focus:border-violet-500"
-            placeholder="Synopsis…"
+            placeholder="Write 1–2 sentences with the title + “read online free” + genre. Or click Generate SEO text."
           />
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={fillSeoDescription}
+              className="rounded-lg bg-white/10 px-3 py-1.5 text-xs font-medium text-violet-300 hover:bg-white/15"
+            >
+              Generate SEO description
+            </button>
+            <span className="text-[11px] text-zinc-600">
+              Auto-filled on publish if left empty. Aim for ~120–160 characters
+              for best Google snippets.
+            </span>
+          </div>
         </Field>
         <Field label="Category">
           <select

@@ -17,7 +17,7 @@ export function MangaCard({ manga }: MangaCardProps) {
         {manga.cover_image_url ? (
           <Image
             src={manga.cover_image_url}
-            alt={manga.title}
+            alt={`${manga.title} manga cover — read online free`}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
             className="object-cover transition duration-500 group-hover:scale-105"

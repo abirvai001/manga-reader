@@ -1,13 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { BookOpen, Mail } from "lucide-react";
+import { Suspense } from "react";
 
-export function Footer() {
+function FooterInner() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  if (pathname?.startsWith("/manga/") && !pathname.includes("/edit")) {
+  // Hide on immersive reader only
+  if (
+    pathname?.startsWith("/manga/") &&
+    !pathname.includes("/edit") &&
+    searchParams.get("view") === "read"
+  ) {
     return null;
   }
 
@@ -40,5 +47,13 @@ export function Footer() {
         </div>
       </div>
     </footer>
+  );
+}
+
+export function Footer() {
+  return (
+    <Suspense fallback={null}>
+      <FooterInner />
+    </Suspense>
   );
 }

@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { BookOpen, Menu, Search, X } from "lucide-react";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { cn } from "@/lib/utils";
 
 const nav = [
@@ -11,13 +11,18 @@ const nav = [
   { href: "/browse", label: "Browse" },
 ];
 
-export function Header() {
+function HeaderInner() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
 
-  // Hide site chrome on immersive reader
-  if (pathname?.startsWith("/manga/") && !pathname.includes("/edit")) {
+  // Hide site chrome only on immersive reader (?view=read)
+  const isReader =
+    pathname?.startsWith("/manga/") &&
+    !pathname.includes("/edit") &&
+    searchParams.get("view") === "read";
+  if (isReader) {
     return null;
   }
 
@@ -95,5 +100,13 @@ export function Header() {
         </nav>
       )}
     </header>
+  );
+}
+
+export function Header() {
+  return (
+    <Suspense fallback={null}>
+      <HeaderInner />
+    </Suspense>
   );
 }
