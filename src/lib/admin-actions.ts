@@ -1,11 +1,10 @@
 "use client";
 
 import type { PlacementZone } from "./types";
+import { uploadToSupabaseStorage, type UploadKind } from "./storage-client";
+import { hasSupabaseEnv } from "./env";
 
-async function api<T>(
-  url: string,
-  init?: RequestInit
-): Promise<T> {
+async function api<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, {
     ...init,
     headers: {
@@ -22,11 +21,24 @@ async function api<T>(
   return data as T;
 }
 
+/**
+ * Upload PDF / cover / ad image.
+ * Uses direct Supabase Storage from the browser (supports large PDFs).
+ * Falls back to API route only when Supabase env is missing (demo).
+ */
 export async function uploadFile(
   bucket: "pdfs" | "covers" | "ads",
-  file: File
+  file: File,
+  onProgress?: (pct: number) => void
 ): Promise<string> {
-  const kind = bucket === "pdfs" ? "pdf" : bucket === "covers" ? "cover" : "ad";
+  const kind: UploadKind =
+    bucket === "pdfs" ? "pdf" : bucket === "covers" ? "cover" : "ad";
+
+  if (hasSupabaseEnv()) {
+    return uploadToSupabaseStorage(kind, file, onProgress);
+  }
+
+  // Demo / unconfigured fallback (small files only)
   const form = new FormData();
   form.append("file", file);
   form.append("kind", kind);
@@ -35,6 +47,15 @@ export async function uploadFile(
     body: form,
   });
   return data.url;
+}
+
+export async function setupStorageBuckets(): Promise<{
+  message: string;
+  created?: string[];
+  errors?: string[];
+  sqlHint?: string;
+}> {
+  return api("/api/admin/setup-storage", { method: "POST" });
 }
 
 export async function createManga(input: {
@@ -61,13 +82,12 @@ export async function deleteManga(id: string) {
 }
 
 export async function createCategory(name: string, slug: string) {
-  const data = await api<{ category: { id: string; name: string; slug: string; created_at: string } }>(
-    "/api/admin/categories",
-    {
-      method: "POST",
-      body: JSON.stringify({ name, slug }),
-    }
-  );
+  const data = await api<{
+    category: { id: string; name: string; slug: string; created_at: string };
+  }>("/api/admin/categories", {
+    method: "POST",
+    body: JSON.stringify({ name, slug }),
+  });
   return data.category;
 }
 
