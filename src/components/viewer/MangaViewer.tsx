@@ -9,8 +9,14 @@ import { ViewerControls } from "./ViewerControls";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 
-// Self-hosted worker (public/pdf.worker.min.mjs) — no third-party CDN in production
-pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
+/**
+ * Worker MUST match the pdfjs-dist version bundled with react-pdf.
+ * Local file is copied from node_modules on postinstall; CDN is version-pinned fallback.
+ */
+if (typeof window !== "undefined") {
+  const v = pdfjs.version;
+  pdfjs.GlobalWorkerOptions.workerSrc = `/pdf.worker.min.mjs?v=${v}`;
+}
 
 /** Insert an inline ad after every N pages in vertical mode */
 const INLINE_AD_EVERY_N_PAGES = 5;
@@ -195,10 +201,25 @@ export function MangaViewer({
         )}
 
         <Document
-          file={pdfUrl}
+          file={
+            typeof pdfUrl === "string" && pdfUrl.startsWith("http")
+              ? { url: pdfUrl }
+              : pdfUrl
+          }
+          options={{
+            // Keep fonts/cmaps aligned with the same pdfjs version as the API
+            cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
+            cMapPacked: true,
+            standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`,
+          }}
           onLoadSuccess={onDocumentLoad}
           onLoadError={(err) => {
-            setError(err.message || "Could not open PDF");
+            const msg = err?.message || "Could not open PDF";
+            setError(
+              /worker|API.*version|version.*API|does not match/i.test(msg)
+                ? `${msg} — PDF engine version mismatch was fixed; hard-refresh (Ctrl+F5) and try again.`
+                : msg
+            );
             setLoading(false);
           }}
           loading={
