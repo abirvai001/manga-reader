@@ -18,16 +18,10 @@ import { checkStorageReady } from "@/lib/storage-client";
 import { suggestMangaDescription } from "@/lib/seo";
 import { hasSupabaseEnv } from "@/lib/env";
 
-const STORAGE_SQL = `-- YourManga.EN storage fix — run ALL of this in Supabase SQL Editor
-INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-VALUES
-  ('pdfs', 'pdfs', true, 104857600, ARRAY['application/pdf']),
-  ('covers', 'covers', true, 5242880, ARRAY['image/jpeg', 'image/png', 'image/webp']),
-  ('ads', 'ads', true, 3145728, ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
-ON CONFLICT (id) DO UPDATE SET
-  public = EXCLUDED.public,
-  file_size_limit = EXCLUDED.file_size_limit,
-  allowed_mime_types = EXCLUDED.allowed_mime_types;
+const STORAGE_SQL = `-- YourManga.EN storage (fixed for error 42601)
+INSERT INTO storage.buckets (id, name, public) VALUES ('pdfs', 'pdfs', true) ON CONFLICT (id) DO NOTHING;
+INSERT INTO storage.buckets (id, name, public) VALUES ('covers', 'covers', true) ON CONFLICT (id) DO NOTHING;
+INSERT INTO storage.buckets (id, name, public) VALUES ('ads', 'ads', true) ON CONFLICT (id) DO NOTHING;
 
 DROP POLICY IF EXISTS "ym_public_read_pdfs" ON storage.objects;
 DROP POLICY IF EXISTS "ym_public_read_covers" ON storage.objects;
@@ -46,17 +40,17 @@ CREATE POLICY "ym_public_read_pdfs" ON storage.objects FOR SELECT USING (bucket_
 CREATE POLICY "ym_public_read_covers" ON storage.objects FOR SELECT USING (bucket_id = 'covers');
 CREATE POLICY "ym_public_read_ads" ON storage.objects FOR SELECT USING (bucket_id = 'ads');
 
-CREATE POLICY "ym_auth_insert_pdfs" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'pdfs');
-CREATE POLICY "ym_auth_insert_covers" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'covers');
-CREATE POLICY "ym_auth_insert_ads" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'ads');
+CREATE POLICY "ym_auth_insert_pdfs" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'pdfs' AND auth.role() = 'authenticated');
+CREATE POLICY "ym_auth_insert_covers" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'covers' AND auth.role() = 'authenticated');
+CREATE POLICY "ym_auth_insert_ads" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'ads' AND auth.role() = 'authenticated');
 
-CREATE POLICY "ym_auth_update_pdfs" ON storage.objects FOR UPDATE TO authenticated USING (bucket_id = 'pdfs');
-CREATE POLICY "ym_auth_update_covers" ON storage.objects FOR UPDATE TO authenticated USING (bucket_id = 'covers');
-CREATE POLICY "ym_auth_update_ads" ON storage.objects FOR UPDATE TO authenticated USING (bucket_id = 'ads');
+CREATE POLICY "ym_auth_update_pdfs" ON storage.objects FOR UPDATE USING (bucket_id = 'pdfs' AND auth.role() = 'authenticated');
+CREATE POLICY "ym_auth_update_covers" ON storage.objects FOR UPDATE USING (bucket_id = 'covers' AND auth.role() = 'authenticated');
+CREATE POLICY "ym_auth_update_ads" ON storage.objects FOR UPDATE USING (bucket_id = 'ads' AND auth.role() = 'authenticated');
 
-CREATE POLICY "ym_auth_delete_pdfs" ON storage.objects FOR DELETE TO authenticated USING (bucket_id = 'pdfs');
-CREATE POLICY "ym_auth_delete_covers" ON storage.objects FOR DELETE TO authenticated USING (bucket_id = 'covers');
-CREATE POLICY "ym_auth_delete_ads" ON storage.objects FOR DELETE TO authenticated USING (bucket_id = 'ads');
+CREATE POLICY "ym_auth_delete_pdfs" ON storage.objects FOR DELETE USING (bucket_id = 'pdfs' AND auth.role() = 'authenticated');
+CREATE POLICY "ym_auth_delete_covers" ON storage.objects FOR DELETE USING (bucket_id = 'covers' AND auth.role() = 'authenticated');
+CREATE POLICY "ym_auth_delete_ads" ON storage.objects FOR DELETE USING (bucket_id = 'ads' AND auth.role() = 'authenticated');
 `;
 
 export default function NewMangaPage() {
