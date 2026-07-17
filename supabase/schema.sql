@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS manga (
   pdf_file_url TEXT NOT NULL,
   category_id UUID REFERENCES categories(id) ON DELETE SET NULL,
   is_published BOOLEAN NOT NULL DEFAULT true,
+  views BIGINT NOT NULL DEFAULT 0,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -211,3 +212,7 @@ INSERT INTO categories (name, slug) VALUES
   ('Comedy', 'comedy'),
   ('Horror', 'horror')
 ON CONFLICT (slug) DO NOTHING;
+
+-- Views counter (also see add-views.sql)
+ALTER TABLE manga ADD COLUMN IF NOT EXISTS views BIGINT NOT NULL DEFAULT 0;
+

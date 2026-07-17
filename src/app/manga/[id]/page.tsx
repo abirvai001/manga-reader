@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BookOpen } from "lucide-react";
 import { MangaViewerLoader } from "@/components/viewer/MangaViewerLoader";
+import { ViewTracker } from "@/components/manga/ViewTracker";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { getAdByZone, getMangaById } from "@/lib/data";
 import {
@@ -93,6 +94,13 @@ export default async function MangaReaderPage({
     return (
       <>
         <JsonLd data={mangaJsonLd(manga)} />
+        {/* Count a view when someone actually opens the reader */}
+        <ViewTracker
+          mangaId={manga.id}
+          initialViews={manga.views ?? 0}
+          track
+          className="sr-only"
+        />
         {/* Crawlable text for bots even on reader view */}
         <article className="sr-only">
           <h1>{manga.title} — read manga online free</h1>
@@ -164,6 +172,14 @@ export default async function MangaReaderPage({
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">
             {manga.title}
           </h1>
+          <div className="mt-3">
+            <ViewTracker
+              mangaId={manga.id}
+              initialViews={manga.views ?? 0}
+              track={false}
+              className="text-sm text-zinc-400"
+            />
+          </div>
           <p className="mt-4 text-base leading-relaxed text-zinc-400">
             {fullBody}
           </p>

@@ -1,13 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Eye } from "lucide-react";
 import type { Manga } from "@/lib/types";
-import { formatDate } from "@/lib/utils";
+import { formatDate, formatViews } from "@/lib/utils";
 
 interface MangaCardProps {
   manga: Manga;
 }
 
 export function MangaCard({ manga }: MangaCardProps) {
+  const views = manga.views ?? 0;
+
   return (
     <Link
       href={`/manga/${manga.id}`}
@@ -33,6 +36,10 @@ export function MangaCard({ manga }: MangaCardProps) {
             {manga.category.name}
           </span>
         )}
+        <span className="absolute bottom-3 right-3 inline-flex items-center gap-1 rounded-full bg-black/60 px-2 py-0.5 text-[11px] font-medium text-white backdrop-blur">
+          <Eye className="h-3 w-3" aria-hidden />
+          {formatViews(views)}
+        </span>
       </div>
       <div className="flex flex-1 flex-col gap-1 p-4">
         <h3 className="line-clamp-2 text-base font-semibold leading-snug text-white group-hover:text-violet-300">
@@ -43,8 +50,12 @@ export function MangaCard({ manga }: MangaCardProps) {
             {manga.description}
           </p>
         )}
-        <p className="mt-auto pt-2 text-[11px] text-zinc-600">
-          {formatDate(manga.created_at)}
+        <p className="mt-auto flex items-center justify-between gap-2 pt-2 text-[11px] text-zinc-600">
+          <span>{formatDate(manga.created_at)}</span>
+          <span className="inline-flex items-center gap-1 text-zinc-500">
+            <Eye className="h-3 w-3" aria-hidden />
+            {formatViews(views)} views
+          </span>
         </p>
       </div>
     </Link>

@@ -1,8 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Plus, ExternalLink } from "lucide-react";
+import { Plus, ExternalLink, Eye } from "lucide-react";
 import { getMangaList } from "@/lib/data";
-import { formatDate } from "@/lib/utils";
+import { formatDate, formatViews } from "@/lib/utils";
 import { DeleteMangaButton } from "@/components/admin/DeleteMangaButton";
 
 export const dynamic = "force-dynamic";
@@ -59,6 +59,10 @@ export default async function AdminMangaPage() {
                 <p className="mt-0.5 text-xs text-zinc-500">
                   {m.category?.name ?? "Uncategorized"} ·{" "}
                   {formatDate(m.created_at)}
+                </p>
+                <p className="mt-1 inline-flex items-center gap-1 text-xs text-zinc-400">
+                  <Eye className="h-3.5 w-3.5" aria-hidden />
+                  {formatViews(m.views ?? 0)} views
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <Link

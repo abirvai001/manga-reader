@@ -32,6 +32,8 @@ export interface Manga {
   pdf_file_url: string;
   category_id: string | null;
   is_published?: boolean;
+  /** Total page/read views */
+  views?: number;
   created_at: string;
   updated_at?: string;
   category?: Category | null;

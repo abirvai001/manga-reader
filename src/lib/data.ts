@@ -173,3 +173,54 @@ export async function getAllAds(): Promise<AdBanner[]> {
     return [];
   }
 }
+
+/**
+ * Increment view count for a manga. Returns the new total (or null on failure).
+ * Prefers Postgres RPC `increment_manga_views`; falls back to read+update.
+ */
+export async function incrementMangaViews(id: string): Promise<number | null> {
+  if (useMock()) {
+    const m = mockManga.find((x) => x.id === id);
+    if (!m) return null;
+    m.views = (m.views ?? 0) + 1;
+    return m.views;
+  }
+
+  try {
+    const supabase = await getSupabase();
+
+    // Atomic RPC (run supabase/add-views.sql first)
+    const { data: rpcData, error: rpcError } = await supabase.rpc(
+      "increment_manga_views",
+      { manga_id: id }
+    );
+
+    if (!rpcError && typeof rpcData === "number") {
+      return rpcData;
+    }
+    if (!rpcError && rpcData != null) {
+      const n = Number(rpcData);
+      if (!Number.isNaN(n)) return n;
+    }
+
+    // Fallback if RPC missing: non-atomic update
+    const { data: row, error: readErr } = await supabase
+      .from("manga")
+      .select("views")
+      .eq("id", id)
+      .maybeSingle();
+    if (readErr) throw readErr;
+    if (!row) return null;
+
+    const next = (Number(row.views) || 0) + 1;
+    const { error: upErr } = await supabase
+      .from("manga")
+      .update({ views: next })
+      .eq("id", id);
+    if (upErr) throw upErr;
+    return next;
+  } catch (err) {
+    logger.error("incrementMangaViews failed", { err: String(err), id });
+    return null;
+  }
+}
